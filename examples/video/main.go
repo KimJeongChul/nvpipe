@@ -68,12 +68,15 @@ func main() {
 		encodeData := make([]byte, encodeSize)
 		n := encoder.Encode(rgba.Pix, encodeData)
 		if n == 0 {
-			fmt.Println("[ERROR] nvdec error")
+			fmt.Println("[ERROR] nvenc error")
 		}
 
 		// Nvpipe Decoding
 		decodeData := make([]uint8, width*height*rgbaChannel) // 1280 * 720 * 4 = 3686400
-		n := decoder.Decode(encodeData[:n], n, output)
+		n = decoder.Decode(encodeData[:n], n, decodeData)
+		if n == 0 {
+			fmt.Println("[ERROR] nvdec error")
+		}
 
 		jpgFile, err := os.Create("output" + strconv.Itoa(fileIdx) + ".jpg")
 		if err != nil {
