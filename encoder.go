@@ -81,28 +81,16 @@ func (encoder *Encoder) Encode(src []uint8, dst []byte) int {
 	return int(size)
 }
 
-/*
-func (encoder *Encoder) Encode(src []byte, dst []int8) int {
-	srcPitch := 4 * encoder.width
-	forceIFrame := false
-	dstSize := 4 * encoder.width * encoder.height
-
-	cstr := C.CString(string(src[:]))
-	in := unsafe.Pointer(&cstr)                  // const void* src
-	out := (*C.uint8_t)(unsafe.Pointer(&dst[0])) // uint8_t*
-
-	size := C.NvPipe_Encode(
+// SetBitrate Reconfigures the encoder with a new bitrate and target frame rate.
+/**
+ * @param nvp Encoder instance.
+ * @param bitrate Bitrate in bit per second, e.g., 32 * 1000 * 1000 = 32 Mbps (for lossy compression only).
+ * @param targetFrameRate At this frame rate the effective data rate approximately equals the bitrate (for lossy compression only).
+ */
+func (encoder *Encoder) SetBitrate(bitrate int, targetFrameRate int) {
+	C.NvPipe_SetBitrate(
 		encoder.enc,
-		in,
-		C.uint64_t(srcPitch),
-		out,
-		C.uint64_t(dstSize),
-		C.uint32_t(encoder.width),
-		C.uint32_t(encoder.height),
-		C.bool(forceIFrame),
+		C.uint64_t(bitrate),
+		C.uint32_t(targetFrameRate),
 	)
-
-	return int(size)
 }
-
-*/
