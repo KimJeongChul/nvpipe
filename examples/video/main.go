@@ -22,6 +22,7 @@ func main() {
 	}
 
 	compression := nvpipe.NvPipeLossless
+	format := nvpipe.NvPipeRGBA32
 
 	width := 1280
 	height := 720
@@ -35,10 +36,10 @@ func main() {
 	fmt.Println("bitrate : ", bitrateMbps, " targetFPS : ", targetFPS)
 
 	// NVDEC
-	decoder := nvpipe.NewDecoder(nvpipe.NvPipeRGBA32, nvpipe.NvPipeH264, width, height)
+	decoder := nvpipe.NewDecoder(format, codec, width, height)
 
 	// NVENC
-	encoder := nvpipe.NewEncoder(nvpipe.NvPipeRGBA32, nvpipe.NvPipeH264, nvpipe.NvPipeLossless, bitrateMbps, targetFPS, width, height)
+	encoder := nvpipe.NewEncoder(format, codec, compression, bitrateMbps, targetFPS, width, height)
 
 	video, err := gocv.OpenVideoCapture("input.mp4") // h264 video file
 	if err != nil {
@@ -51,11 +52,11 @@ func main() {
 
 	fileIdx := 0
 	for {
-		if ok := video.Read(&img); !ok {
+		if ok := video.Read(&mat); !ok {
 			return
 		}
 
-		if img.Empty() {
+		if mat.Empty() {
 			break
 		}
 
@@ -86,7 +87,7 @@ func main() {
 		// Preprocessing using image.RGBA
 		start := image.Point{0, 0}
 		end := image.Point{width, height}
-		img := image.NewRGBA(image.Rectangle{start, end})
+		output := image.NewRGBA(image.Rectangle{start, end})
 
 		// RGBA
 		rgbaSlice := make([]color.RGBA, 0)
@@ -101,12 +102,12 @@ func main() {
 		// Draw RGBA
 		for y := 0; y < height; y++ {
 			for x := 0; x < width; x++ {
-				img.Set(x, y, rgbaSlice[y*width+x])
+				output.Set(x, y, rgbaSlice[y*width+x])
 			}
 		}
 
 		// File Write
-		jpeg.Encode(jpgFile, img, nil)
+		jpeg.Encode(jpgFile, output, nil)
 
 		fileIdx++
 	}
