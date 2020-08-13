@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/KimJeongChul/nvpipe"
+	"github.com/gen2brain/x264-go"
 )
 
 func main() {
@@ -19,7 +20,7 @@ func main() {
 		fmt.Println("NvPipe_Codec : HEVC")
 	}
 
-	compression := nvpipe.NvPipeLossless
+	format := nvpipe.NvPipeRGBA32
 
 	width := 1280
 	height := 720
@@ -33,10 +34,7 @@ func main() {
 	fmt.Println("bitrate : ", bitrateMbps, " targetFPS : ", targetFPS)
 
 	// NVDEC
-	decoder := nvpipe.NewDecoder(nvpipe.NvPipeRGBA32, nvpipe.NvPipeH264, width, height)
-
-	// NVENC
-	encoder := nvpipe.NewEncoder(nvpipe.NvPipeRGBA32, nvpipe.NvPipeH264, nvpipe.NvPipeLossless, bitrateMbps, targetFPS, width, height)
+	decoder := nvpipe.NewDecoder(format, codec, width, height)
 
 	// Input jpg file
 	imageFile, err := os.Open("input.jpg")
@@ -73,7 +71,10 @@ func main() {
 	decodeData := make([]uint8, width*height*rgbaChannel) // 1280 * 720 * 4 = 3686400
 
 	// NvPipe Decode
-	n = decoder.Decode(h264Buf.Bytes(), h264Buf.Len(), decodeData)
+	n := decoder.Decode(h264Buf.Bytes(), h264Buf.Len(), decodeData)
+	if n == 0 {
+		fmt.Println("[ERROR] nvdec error")
+	}
 
 	// Save to Decode Data
 	jpgFile, err := os.Create("output.jpg")
@@ -89,10 +90,10 @@ func main() {
 	// RGBA
 	rgbaSlice := make([]color.RGBA, 0)
 	for i := 0; i < width*height; i++ {
-		r := output[4*i+0]
-		g := output[4*i+1]
-		b := output[4*i+2]
-		a := output[4*i+3]
+		r := decodeData[4*i+0]
+		g := decodeData[4*i+1]
+		b := decodeData[4*i+2]
+		a := decodeData[4*i+3]
 		rgbaSlice = append(rgbaSlice, color.RGBA{r, g, b, a})
 	}
 
