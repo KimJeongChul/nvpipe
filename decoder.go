@@ -65,3 +65,18 @@ func (decoder *Decoder) Decode(src []byte, srcSize int, dst []uint8) int {
 
 	return int(size)
 }
+
+// Destroy Cleans up an decoder instance.
+func (decoder *Decoder) Destroy() {
+	C.NvPipe_Destroy(decoder.dec)
+	decoder = nil
+}
+
+// GetError Returns an error message for the last error that occured.
+/**
+ * @return Returned string must not be deleted.
+ */
+func (decoder *Decoder) GetError() string {
+	err := C.NvPipe_GetError(decoder.dec)
+	return C.GoString(err)
+}
