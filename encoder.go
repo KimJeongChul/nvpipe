@@ -94,3 +94,18 @@ func (encoder *Encoder) SetBitrate(bitrate int, targetFrameRate int) {
 		C.uint32_t(targetFrameRate),
 	)
 }
+
+// Destroy Cleans up an encoder instance.
+func (encoder *Encoder) Destroy() {
+	C.NvPipe_Destroy(encoder.enc)
+	encoder = nil
+}
+
+// GetError Returns an error message for the last error that occured.
+/**
+ * @return Returned string must not be deleted.
+ */
+func (encoder *Encoder) GetError() string {
+	err := C.NvPipe_GetError(encoder.enc)
+	return C.GoString(err)
+}
