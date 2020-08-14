@@ -5,7 +5,6 @@ package nvpipe
 #cgo LDFLAGS: -L./ -lNvPipe
 */
 import "C"
-import "unsafe"
 
 // NvPipeCodec Available video codecs in NvPipe.
 type NvPipeCodec int
@@ -42,21 +41,3 @@ const (
 	// NvPipeUInt32 uint32 format
 	NvPipeUInt32 = NvPipeFormat(C.NVPIPE_UINT32)
 )
-
-// Destroy Cleans up an encoder or decoder instance.
-/**
- * @param nvp The encoder or decoder instance to destroy.
- */
-func Destroy(nvp unsafe.Pointer) {
-	C.NvPipe_Destroy(nvp)
-}
-
-// GetError Returns an error message for the last error that occured.
-/**
- * @param nvp Encoder or decoder. Use NULL to get error message if encoder or decoder creation failed.
- * @return Returned string must not be deleted.
- */
-func GetError(nvp unsafe.Pointer) string {
-	err := C.NvPipe_GetError(nvp)
-	return C.GoString(err)
-}
